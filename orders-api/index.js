@@ -1,16 +1,7 @@
 const express = require("express");
 const amqp = require("amqplib");
-const cors = require("cors"); // ✅ MOVE HERE
 
 const app = express();
-
-// ✅ CORS MUST BE BEFORE ROUTES
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-  })
-);
-
 app.use(express.json());
 
 // ===== RabbitMQ config (AlwaysData) =====
@@ -55,7 +46,6 @@ app.post("/orders", async (req, res) => {
       order,
     });
   } catch (e) {
-    console.error(e);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -71,3 +61,9 @@ initRabbit()
     console.error("❌ RabbitMQ init failed:", e.message);
     process.exit(1);
   });
+
+  const cors = require("cors");
+
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
