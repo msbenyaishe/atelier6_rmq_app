@@ -20,14 +20,23 @@ const initRabbit = async () => {
 };
 
 const corsMiddleware = cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(",") || ["*"],
+  origin: process.env.ALLOWED_ORIGINS?.split(",") || [
+    "https://atelier6-rmq-frontend.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+  ],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 });
 
 module.exports = async (req, res) => {
   await new Promise((resolve) => corsMiddleware(req, res, resolve));
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
