@@ -1,93 +1,34 @@
 import { useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [email, setEmail] = useState("");
   const [total, setTotal] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
 
-  const submitOrder = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage("");
 
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/orders`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            total: Number(total),
-          }),
-        }
-      );
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, total: Number(total) }),
+    });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Error");
-      }
-
-      setMessage("✅ Order created. Email will be sent asynchronously.");
-      setEmail("");
-      setTotal("");
-    } catch (err) {
-      setMessage("❌ Failed to create order");
-    } finally {
-      setLoading(false);
-    }
+    const data = await res.json();
+    setMsg(data.message || "Order sent");
   };
 
   return (
-    <div style={styles.container}>
-      <h2>🛒 Create Order</h2>
-
-      <form onSubmit={submitOrder} style={styles.form}>
-        <input
-          type="email"
-          placeholder="Customer email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <input
-          type="number"
-          placeholder="Total amount"
-          value={total}
-          onChange={(e) => setTotal(e.target.value)}
-          required
-        />
-
-        <button disabled={loading}>
-          {loading ? "Sending..." : "Create Order"}
-        </button>
-      </form>
-
-      {message && <p>{message}</p>}
-    </div>
+    <form onSubmit={submit}>
+      <h2>Create Order</h2>
+      <input value={email} onChange={(e) => setEmail(e.target.value)} />
+      <input value={total} onChange={(e) => setTotal(e.target.value)} />
+      <button>Create</button>
+      <p>{msg}</p>
+    </form>
   );
 }
-
-const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "80px auto",
-    padding: "20px",
-    border: "1px solid #ddd",
-    borderRadius: "8px",
-    textAlign: "center",
-    fontFamily: "Arial",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-};
 
 export default App;
